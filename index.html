@@ -5,32 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>عرض المستند</title>
     <style>
-        body {
+        html, body {
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
             background-color: #ffffff;
+            overflow-x: hidden;
+        }
+        #content {
+            width: 100%;
+            height: 100%;
         }
         img {
-            width: 100%; /* تجعل الصورة تأخذ عرض الشاشة بالكامل تلقائياً */
+            width: 100%;
             height: auto;
             display: block;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
     </style>
 </head>
 <body>
 
-    <img id="myImage" src="" alt="Document">
+    <div id="content"></div>
 
     <script>
-        // الكود يقرأ اسم الصورة من الرابط
         const urlParams = new URLSearchParams(window.location.search);
-        const imageName = urlParams.get('file'); 
+        const fileName = urlParams.get('file'); 
+        const contentDiv = document.getElementById('content');
 
-        if (imageName) {
-            // الكود يبحث تلقائياً عن الصورة داخل فولدر images لتنظيم الريبو
-            document.getElementById('myImage').src = "images/" + imageName;
+        if (fileName) {
+            const relativePath = "images/" + fileName;
+            
+            // التأكد من امتداد الملف (هل هو PDF؟)
+            if (fileName.toLowerCase().endsWith('.pdf')) {
+                
+                // رابط الملف الكامل على جيت هاب بيتم تجهيزه تلقائياً
+                const absoluteUrl = window.location.origin + window.location.pathname.replace('index.html', '') + relativePath;
+                
+                // استخدام قارئ جوجل لعرض الـ PDF بسلاسة على الموبايل (آيفون وأندرويد) بملء الشاشة
+                contentDiv.innerHTML = `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(absoluteUrl)}&embedded=true"></iframe>`;
+                
+            } else {
+                // إذا كان الملف صورة عادية (png, jpg, jpeg)
+                contentDiv.innerHTML = `<img src="${relativePath}" alt="Document">`;
+            }
         } else {
-            document.body.innerHTML = "<h2 style='text-align:center; padding-top:50px;'>عذراً، لم يتم تحديد ملف الصورة!</h2>";
+            contentDiv.innerHTML = "<h2 style='text-align:center; padding-top:50px;'>عذراً، لم يتم تحديد ملف!</h2>";
         }
     </script>
 </body>
