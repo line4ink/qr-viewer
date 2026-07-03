@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض المستند</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+        img {
+            width: 100%; /* تجعل الصورة تأخذ عرض الشاشة بالكامل تلقائياً */
+            height: auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <img id="myImage" src="" alt="Document">
+
+    <script>
+        // الكود يقرأ اسم الصورة من الرابط
+        const urlParams = new URLSearchParams(window.location.search);
+        const imageName = urlParams.get('file'); 
+
+        if (imageName) {
+            // الكود يبحث تلقائياً عن الصورة داخل فولدر images لتنظيم الريبو
+            document.getElementById('myImage').src = "images/" + imageName;
+        } else {
+            document.body.innerHTML = "<h2 style='text-align:center; padding-top:50px;'>عذراً، لم يتم تحديد ملف الصورة!</h2>";
+        }
+    </script>
+</body>
+</html>
