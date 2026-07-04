@@ -3,51 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم السرية</title>
+    <title>لوحة التحكم السرية - استعراض الملفات</title>
     <style>
-        body { background-color: #f4f6f9; font-family: sans-serif; display: none; /* مخفي حتى كتابة الباسورد */ }
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: none; margin: 0; padding: 0; }
         .admin-panel { max-width: 500px; margin: 50px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; direction: rtl; }
-        input[type="text"] { width: 100%; padding: 12px; margin: 15px 0; border: 2px solid #bdc3c7; border-radius: 8px; box-sizing: border-box; text-align: left; }
-        button { background-color: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; width: 100%; }
+        h2 { color: #2c3e50; margin-bottom: 20px; }
+        p { color: #7f8c8d; font-size: 14px; }
+        select { width: 100%; padding: 12px; margin: 15px 0; border: 2px solid #bdc3c7; border-radius: 8px; box-sizing: border-box; font-size: 16px; background-color: #fff; cursor: pointer; }
+        button { background-color: #3498db; color: white; border: none; padding: 12px 25px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; transition: background 0.3s; }
+        button:hover { background-color: #2980b9; }
         .result-box { margin-top: 25px; padding-top: 20px; border-top: 2px dashed #ecf0f1; display: none; }
-        .qr-img { width: 200px; height: 200px; margin-top: 15px; }
-        .url-text { background: #efefef; padding: 10px; border-radius: 5px; font-size: 13px; word-break: break-all; display: block; margin-bottom: 10px; }
+        .qr-img { width: 200px; height: 200px; margin-top: 15px; border: 1px solid #eee; padding: 5px; }
+        .url-text { background: #efefef; padding: 10px; border-radius: 5px; font-size: 13px; word-break: break-all; display: block; margin-bottom: 10px; text-align: left; direction: ltr; }
+        #loading { color: #e67e22; font-weight: bold; margin: 15px 0; }
     </style>
 </head>
 <body>
 
     <div class="admin-panel">
-        <h2>لوحة توليد الباركود السرية 🔒</h2>
-        <input type="text" id="fileNameInput" placeholder="اكتب اسم الملف هنا مثل: 4.JPG">
-        <button onclick="generateQRAndLink()">توليد الرابط والباركود</button>
+        <h2>لوحة التحكم السرية 🔒</h2>
+        <p>اختر الملف مباشرة من القائمة لتوليد الرابط والباركود دون الحاجة للكتابة:</p>
+        
+        <div id="loading">جاري جلب الملفات الحالية من جيت هاب...</div>
+        
+        <select id="fileSelect" style="display:none;"></select>
+        
+        <button id="genBtn" onclick="generateQRAndLink()" style="display:none;">توليد الرابط والباركود</button>
         
         <div id="resultBox" class="result-box">
             <strong>الرابط المباشر للملف:</strong>
             <span id="generatedUrl" class="url-text"></span>
+            
             <strong>كود الـ QR جاهز:</strong><br>
-            <img id="qrCodeImg" class="qr-img" src="" alt="QR Code">
+            <img id="qrCodeImg" class="qr-img" src="" alt="QR Code"><br>
+            <small style="color:#95a5a6; display:block; margin-top:5px;">كليك يمين على الباركود واختار (Save image as) لحفظه</small>
         </div>
     </div>
 
     <script>
-        // تم تحديث كلمة السر هنا بناءً على طلبك
+        // التحقق من كلمة السر الخاصة بك
         const password = prompt("من فضلك أدخل كلمة المرور للدخول للوحة التحكم:");
         if (password === "Mohamed@9498#") {
-            document.body.style.display = "block"; // إظهار الصفحة لو الباسورد صح
+            document.body.style.display = "block";
+            loadFilesFromGitHub(); // استدعاء دالة جلب الملفات فوراً
         } else {
             alert("كلمة مرور خاطئة!");
-            window.location.href = "index.html"; // طرده لصفحة العرض العامة
+            window.location.href = "index.html"; 
         }
 
+        // دالة سحرية تجلب أسماء الملفات ديناميكياً من مستودعك
+        async function loadFilesFromGitHub() {
+            try {
+                // استخراج اسم المستخدم واسم المستودع تلقائياً من الرابط اللايف
+                const username = window.location.hostname.split('.')[0]; 
+                const repoName = window.location.pathname.split('/')[1]; 
+
+                // الاتصال بـ GitHub API لقراءة فولدر images
+                const apiUrl = `https://api.github.com/repos/${username}/${repoName}/contents/images`;
+                
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('فشل في الاتصال بجيت هاب');
+                
+                const files = await response.json();
+                const select = document.getElementById('fileSelect');
+                
+                select.innerHTML = '<option value="">-- اختر الملف من هنا --</option>';
+                
+                // إضافة الملفات المكتشفة داخل القائمة
+                files.forEach(file => {
+                    if (file.type === 'file') {
+                        const option = document.createElement('option');
+                        option.value = file.name;
+                        option.text = file.name;
+                        select.appendChild(option);
+                    }
+                });
+                
+                // إخفاء كلمة "جاري التحميل" وإظهار القائمة والزر
+                document.getElementById('loading').style.display = 'none';
+                select.style.display = 'block';
+                document.getElementById('genBtn').style.display = 'block';
+                
+            } catch (error) {
+                document.getElementById('loading').innerText = '⚠️ حدث خطأ أثناء جلب الملفات. تأكد من رفع الملفات وأنك تفتح اللوحة من الرابط اللايف وليس من الكمبيوتر مباشرة.';
+                console.error(error);
+            }
+        }
+
+        // دالة توليد الباركود بناءً على اختيارك من القائمة
         function generateQRAndLink() {
-            const inputVal = document.getElementById('fileNameInput').value.trim();
-            if (!inputVal) return alert('اكتب اسم الملف!');
+            const select = document.getElementById('fileSelect');
+            const selectedFile = select.value;
             
-            // بيعمل الرابط أوتوماتيك ويوجهه لملف الـ index.html العام
+            if (!selectedFile) {
+                alert('من فضلك اختر ملفاً من القائمة أولاً!');
+                return;
+            }
+            
             const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
-            const finalFileUrl = `${baseUrl}?file=${inputVal}`;
+            const finalFileUrl = `${baseUrl}?file=${selectedFile}`;
             
             document.getElementById('generatedUrl').innerText = finalFileUrl;
+            
             const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(finalFileUrl)}`;
             document.getElementById('qrCodeImg').src = qrApiUrl;
             document.getElementById('resultBox').style.display = 'block';
