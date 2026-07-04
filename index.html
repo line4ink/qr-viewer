@@ -3,36 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عرض المستند</title>
+    <title>مستعرض المستندات</title>
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #ffffff;
-            overflow-x: hidden;
-        }
-        #content {
-            width: 100%;
-            height: 100%;
-        }
-        img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #ffffff; overflow-x: hidden; }
+        #content { width: 100%; height: 100%; }
+        img { width: 100%; height: auto; display: block; }
+        iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
-
     <div id="content"></div>
-
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const fileName = urlParams.get('file'); 
@@ -40,22 +20,15 @@
 
         if (fileName) {
             const relativePath = "images/" + fileName;
-            
-            // التأكد من امتداد الملف (هل هو PDF؟)
             if (fileName.toLowerCase().endsWith('.pdf')) {
-                
-                // رابط الملف الكامل على جيت هاب بيتم تجهيزه تلقائياً
                 const absoluteUrl = window.location.origin + window.location.pathname.replace('index.html', '') + relativePath;
-                
-                // استخدام قارئ جوجل لعرض الـ PDF بسلاسة على الموبايل (آيفون وأندرويد) بملء الشاشة
                 contentDiv.innerHTML = `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(absoluteUrl)}&embedded=true"></iframe>`;
-                
             } else {
-                // إذا كان الملف صورة عادية (png, jpg, jpeg)
                 contentDiv.innerHTML = `<img src="${relativePath}" alt="Document">`;
             }
         } else {
-            contentDiv.innerHTML = "<h2 style='text-align:center; padding-top:50px;'>عذراً، لم يتم تحديد ملف!</h2>";
+            // لو حد فتح الرابط الأساسي غريب هيشوف صفحة بيضاء تماماً
+            contentDiv.innerHTML = ""; 
         }
     </script>
 </body>
